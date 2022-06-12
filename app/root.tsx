@@ -12,7 +12,7 @@ import styles from 'app/style/output.css';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
-  title: 'New Remix App',
+  title: 'Blackstone challenge',
   viewport: 'width=device-width,initial-scale=1',
 });
 
@@ -27,7 +27,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 font-quicksand">
         <Outlet />
         <ScrollRestoration />
         <Scripts />

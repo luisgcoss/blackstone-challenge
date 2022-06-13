@@ -7,7 +7,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react';
+import { Provider } from 'react-redux';
 
+import { store } from './redux';
 import styles from 'app/style/output.css';
 
 export const meta: MetaFunction = () => ({
@@ -28,7 +30,9 @@ export default function App() {
         <Links />
       </head>
       <body className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 font-quicksand">
-        <Outlet />
+        <Provider store={store}>
+          <Outlet />
+        </Provider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

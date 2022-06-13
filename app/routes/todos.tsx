@@ -78,8 +78,8 @@ export default function Todos() {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="flex flex-col bg-black rounded text-white p-4 shadow-md shadow-yellow-500 h-96 w-full md:max-w-[600px] mb-4">
-        <h1 className="font-bold text-2xl border-b border-yellow-500 mb-2">
+      <div className="flex flex-col rounded bg-gray-100 p-4 shadow-xl h-96 w-full md:max-w-[600px] mb-4">
+        <h1 className="font-bold text-2xl border-b-2 border-blue-500 mb-2">
           Todo List
         </h1>
         <div className="mb-2">
@@ -99,7 +99,7 @@ export default function Todos() {
                 />
                 <button
                   type="submit"
-                  className="flex flex-col text-yellow-500 disabled:tex-red-800"
+                  className="flex flex-col text-blue-500 disabled:tex-red-800"
                   disabled={
                     !mainForm.isValid ||
                     transition.state === 'submitting' ||
@@ -113,8 +113,8 @@ export default function Todos() {
                         !mainForm.isValid ||
                         transition.state === 'submitting' ||
                         !mainForm.dirty
-                          ? 'text-yellow-700'
-                          : 'text-yellow-500'
+                          ? 'text-blue-700'
+                          : 'text-blue-500'
                       }`}
                     />
                   ) : (
@@ -124,8 +124,8 @@ export default function Todos() {
                         !mainForm.isValid ||
                         transition.state === 'submitting' ||
                         !mainForm.dirty
-                          ? 'text-yellow-700'
-                          : 'text-yellow-500'
+                          ? 'text-blue-700'
+                          : 'text-blue-500'
                       }`}
                     />
                   )}
@@ -170,7 +170,7 @@ export default function Todos() {
             </div>
           )}
         </div>
-        <div className="bg-gray-600 rounded p-2 h-full overflow-y-auto">
+        <div className="bg-blue-300 rounded p-2 h-full overflow-y-auto">
           {data.map((item) => (
             <ListItem
               key={item.id}
@@ -183,12 +183,11 @@ export default function Todos() {
           ))}
         </div>
       </div>
-      <div className="flex flex-col bg-black rounded text-white p-4 shadow-md shadow-yellow-500 h-96 w-full md:max-w-[600px]">
-        <h1 className="font-bold text-2xl border-b border-yellow-500 mb-2">
+      <div className="flex flex-col rounded p-4 shadow-xl h-96 w-full md:max-w-[600px]">
+        <h1 className="font-bold text-2xl border-b-2 border-blue-500 mb-2">
           Done
         </h1>
-
-        <div className="bg-gray-600 rounded p-2 h-full overflow-y-auto">
+        <div className="bg-blue-300 rounded p-2 h-full overflow-y-auto">
           {data.map((item) => (
             <DoneListItem
               key={item.id}

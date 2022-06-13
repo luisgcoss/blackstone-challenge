@@ -14,15 +14,15 @@ function ListItem(props: ListItemProps) {
   const { title, endDate, onDelete, setUndone } = props;
 
   return (
-    <div className="flex flex-col items-center rounded bg-black mb-2 p-1 bg-yellow-500">
-      <div className="text-black">{title}</div>
-      <div className="flex w-full justify-end">
-        <div className="text-yellow-500">{endDate}</div>
+    <div className="flex flex-col items-center rounded mb-2 p-1 bg-gray-300">
+      <div>{title}</div>
+      <div className="flex w-full justify-between">
+        <div className="text-blue-500 font-bold">{endDate}</div>
         <div className="flex gap-1 items-center">
           <button
             onClick={setUndone}
             disabled={transition.state === 'submitting'}
-            className="bg-yellow-600 rounded w-6 h-6 flex items-center justify-center"
+            className="bg-yellow-500 rounded w-6 h-6 flex items-center justify-center"
           >
             <BsArrowCounterclockwise className="text-black" />
           </button>
@@ -30,7 +30,7 @@ function ListItem(props: ListItemProps) {
             onClick={onDelete}
             disabled={transition.state === 'submitting'}
           >
-            <BsXSquareFill size="1.5rem" className="text-red-800" />
+            <BsXSquareFill size="1.5rem" className="text-red-500" />
           </button>
         </div>
       </div>

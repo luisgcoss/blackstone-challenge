@@ -32,38 +32,38 @@ function ListItem(props: ListItemProps) {
   } = props;
 
   return (
-    <div className="flex flex-col items-center rounded bg-black mb-2 p-1">
+    <div className="flex flex-col items-center rounded bg-gray-300 mb-2 p-1">
       <div className="flex">
         <div>{title}</div>
         <button onClick={toggleSelect} className="mr-1 h-fit">
           {isSelected ? (
-            <ImRadioChecked size="1.5rem" className="text-yellow-500" />
+            <ImRadioChecked size="1.5rem" className="text-blue-500" />
           ) : (
-            <ImRadioUnchecked size="1.5rem" className="text-yellow-500" />
+            <ImRadioUnchecked size="1.5rem" className="text-blue-500" />
           )}
         </button>
       </div>
       <div className="flex w-full justify-between">
-        <div className="text-yellow-500">{endDate}</div>
+        <div className="text-blue-500 font-bold">{endDate}</div>
         {!isOnSelectMode && (
           <div className="flex gap-1 items-center">
             <button
               onClick={handleEditing}
               disabled={transition.state === 'submitting'}
             >
-              <FaPenSquare size="1.5rem" className="text-yellow-800" />
+              <FaPenSquare size="1.5rem" className="text-blue-500" />
             </button>
             <button
               onClick={setDone}
               disabled={transition.state === 'submitting'}
             >
-              <FaCheckSquare size="1.5rem" className="text-green-600" />
+              <FaCheckSquare size="1.5rem" className="text-green-500" />
             </button>
             <button
               onClick={onDelete}
               disabled={transition.state === 'submitting'}
             >
-              <BsXSquareFill size="1.3rem" className="text-red-800" />
+              <BsXSquareFill size="1.3rem" className="text-red-600" />
             </button>
           </div>
         )}

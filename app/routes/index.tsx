@@ -33,13 +33,13 @@ export default function Index() {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="flex flex-col bg-black rounded text-white p-4 shadow-md shadow-yellow-500 h-60 w-full md:max-w-[400px] mb-4">
-        <div className="flex justify-between items-center font-bold text-2xl border-b border-yellow-500 mb-2">
+      <div className="flex flex-col rounded p-4 shadow-xl h-60 w-full md:max-w-[400px] mb-4">
+        <div className="flex justify-between items-center font-bold text-2xl border-b-2 border-blue-500 mb-2">
           <h1 className="font-bold text-2xl">Log In</h1>
-          <FaUserCircle size={35} className="text-yellow-500 mb-1" />
+          <FaUserCircle size={35} className="text-blue-500 mb-1" />
         </div>
         <form className="flex flex-col flex-1" onSubmit={form.handleSubmit}>
-          <fieldset className="flex justify-between mb-4">
+          <fieldset className="flex justify-evenly mb-4">
             <legend className="sr-only">Login or Register?</legend>
             <label className="flex items-center">
               <Input

@@ -7,7 +7,7 @@ const Button = (props: Props) => {
 
   return (
     <button
-      className={`rounded bg-yellow-500 text-black px-2 font-bold ${className}`}
+      className={`rounded bg-blue-500 px-2 text-white font-bold ${className}`}
       {...rest}
     />
   );

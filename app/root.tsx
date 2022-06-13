@@ -29,7 +29,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-900 font-quicksand">
+      <body className="flex flex-col items-center justify-center min-h-screen p-4 font-quicksand">
         <Provider store={store}>
           <Outlet />
         </Provider>

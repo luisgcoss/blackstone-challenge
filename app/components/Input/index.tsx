@@ -7,7 +7,7 @@ const Input = (props: Props) => {
 
   return (
     <input
-      className={`rounded bg-gray-600 px-2 h-6 accent-yellow-500 ${className}`}
+      className={`rounded bg-gray-300 px-2 h-6 accent-blue-500 ${className}`}
       {...rest}
     />
   );

@@ -1,7 +1,5 @@
 import { useTransition } from '@remix-run/react';
 import { BsArrowCounterclockwise, BsXSquareFill } from 'react-icons/bs';
-import { FaCheckSquare } from 'react-icons/fa';
-import { ImRadioChecked, ImRadioUnchecked } from 'react-icons/im';
 
 interface ListItemProps {
   title: string;

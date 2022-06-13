@@ -1,14 +1,14 @@
 import * as Yup from 'yup';
-import { Field, useFormik } from 'formik';
-import Input from '~/components/Input';
+import { useFormik } from 'formik';
+import { redirect } from '@remix-run/node';
 import { FaUserCircle } from 'react-icons/fa';
-import Button from '~/components/Button';
-import { useActionData } from '@remix-run/react';
+import { useActionData, useSubmit } from '@remix-run/react';
+import type { ActionFunction } from '@remix-run/node';
 
-const initialValues = {
-  username: '',
-  password: '',
-};
+import Input from '~/components/Input';
+import Button from '~/components/Button';
+import { parseDataToSubmit } from '~/utils/parseDataToSubmit';
+import { apiCall, storage } from '~/utils/api';
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -19,12 +19,47 @@ const validationSchema = Yup.object({
     .min(6, 'Password must have at least six characters'),
 });
 
+export const action: ActionFunction = async ({ request }) => {
+  const data = JSON.parse(
+    (await request.formData()).get('data')?.toString() ?? ''
+  );
+
+  const { route, ...rest } = data;
+
+  const req = await apiCall(route, 'post', rest);
+
+  if (req.status !== 201) {
+    return {
+      formError:
+        (await req.json().then((data) => data.message)) ||
+        'Password or username incorrects',
+    };
+  } else {
+    const { accessToken } = await req.json();
+    const session = await storage.getSession();
+    session.set('token', accessToken);
+
+    return redirect('/todos', {
+      headers: {
+        'Set-Cookie': await storage.commitSession(session),
+      },
+    });
+  }
+};
+
 export default function Index() {
   const actionData = useActionData();
+  const submit = useSubmit();
 
-  const handleFormSubmit = (values) => {
-    console.log(values);
+  const handleFormSubmit = (values) =>
+    submit(parseDataToSubmit(values), { method: 'post' });
+
+  const initialValues = {
+    username: actionData?.username || '',
+    password: actionData?.password || '',
+    route: actionData?.route || 'user',
   };
+
   const form = useFormik({
     initialValues,
     onSubmit: handleFormSubmit,
@@ -44,41 +79,57 @@ export default function Index() {
             <label className="flex items-center">
               <Input
                 type="radio"
-                name="loginType"
-                value="login"
                 defaultChecked={
-                  !actionData?.fields?.loginType ||
-                  actionData?.fields?.loginType === 'login'
+                  !actionData?.route || actionData?.route === 'auth/login'
                 }
+                {...form.getFieldProps('route')}
+                value="auth/login"
               />{' '}
               Login
             </label>
             <label className="flex items-center">
               <Input
                 type="radio"
-                name="loginType"
-                value="register"
-                defaultChecked={actionData?.fields?.loginType === 'register'}
+                defaultChecked={
+                  !actionData?.route || actionData?.route === 'user'
+                }
+                {...form.getFieldProps('route')}
+                value="user"
               />{' '}
               Register
             </label>
           </fieldset>
+          {actionData?.formError ? (
+            <p className="text-xs text-red-500" role="alert">
+              {actionData.formError}
+            </p>
+          ) : null}
           <div className="flex flex-col flex-1 justify-between">
             <div className="flex flex-col w-full">
               <Input
                 type="text"
                 placeholder="Username"
-                className="mb-2"
+                className="mt-2"
                 {...form.getFieldProps('username')}
               />
+              {form.touched.username && form.errors.username ? (
+                <div className="text-xs text-red-500">
+                  {form.errors.username}
+                </div>
+              ) : null}
               <Input
                 type="password"
                 placeholder="Password"
-                className="mb-2"
+                className="mt-2"
                 {...form.getFieldProps('password')}
               />
+              {form.touched.password && form.errors.password ? (
+                <div className="text-xs text-red-500">
+                  {form.errors.password}
+                </div>
+              ) : null}
             </div>
-            <Button>Submit</Button>
+            <Button type="submit">Submit</Button>
           </div>
         </form>
       </div>

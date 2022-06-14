@@ -73,7 +73,7 @@ export const action: ActionFunction = async ({ request }) => {
       case 'UPDATE':
         return await apiCall(`todo/${id}`, 'patch', rest, jwt);
       case 'UPDATE_MANY':
-        return await apiCall(`todo/${id}`, 'patch', rest, jwt);
+        return await apiCall(`todo`, 'patch', rest, jwt);
       case 'LOGOUT':
         const session = await storage.getSession(
           request?.headers.get('Cookie')
@@ -130,11 +130,19 @@ export default function Todos() {
       method: 'patch',
     });
 
-  const handleTodoSetDoneMany = (list: number[]) =>
-    submit(parseDataToSubmit({ todos: list, type: 'SET_DONE_MANY' }), {
-      method: 'patch',
-    });
-
+  const handleTodoSetDoneMany = (list: number[]) => {
+    dispatch(claearSelection());
+    submit(
+      parseDataToSubmit({
+        isMarkedAsDone: true,
+        todos: list,
+        type: 'UPDATE_MANY',
+      }),
+      {
+        method: 'patch',
+      }
+    );
+  };
   const handleFormSubmit = (values: Pick<Todo, 'endDate' | 'id' | 'title'>) => {
     form.resetForm();
 
@@ -317,9 +325,7 @@ export default function Todos() {
           Done
         </h1>
         <div className="bg-blue-300 rounded p-2 h-full overflow-y-auto">
-          {!success && !data?.find((todo: Todo) => todo.isMarkedAsDone) ? (
-            <p>Your done todos will appear here</p>
-          ) : (
+          {success && data?.find((todo: Todo) => todo.isMarkedAsDone) ? (
             data.reduce((prv: ReactElement[], crr: Todo) => {
               if (crr.isMarkedAsDone)
                 return [
@@ -336,6 +342,8 @@ export default function Todos() {
                 ];
               return prv;
             }, [])
+          ) : (
+            <p>Your done todos will appear here</p>
           )}
         </div>
       </div>

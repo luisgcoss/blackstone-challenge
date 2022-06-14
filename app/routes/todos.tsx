@@ -155,9 +155,13 @@ export default function Todos() {
   };
 
   const handleEdit = (payload: Partial<Todo>) => {
-    form.setFieldValue('id', payload.id);
-    form.setFieldValue('title', payload.title);
-    form.setFieldValue('endDate', payload.endDate);
+    if (form.values.id) {
+      form.resetForm();
+    } else {
+      form.setFieldValue('id', payload.id);
+      form.setFieldValue('title', payload.title);
+      form.setFieldValue('endDate', payload.endDate);
+    }
   };
 
   const formInitialValues = {
@@ -219,7 +223,7 @@ export default function Todos() {
                 />
                 <button
                   type="submit"
-                  className="flex flex-col text-blue-500 disabled:tex-red-800"
+                  className="flex items-center justify-cente w-6 h-6"
                   disabled={
                     !form.isValid ||
                     transition.state === 'submitting' ||
@@ -229,7 +233,7 @@ export default function Todos() {
                 >
                   {form.values.id ? (
                     <FaPenSquare
-                      size="1.5rem"
+                      size="1.6rem"
                       className={`${
                         !form.isValid ||
                         transition.state === 'submitting' ||
@@ -241,7 +245,7 @@ export default function Todos() {
                     />
                   ) : (
                     <BsFillPlusSquareFill
-                      size="1.5rem"
+                      size="1.4rem"
                       className={`${
                         !form.isValid ||
                         transition.state === 'submitting' ||

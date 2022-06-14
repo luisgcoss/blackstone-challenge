@@ -1,5 +1,4 @@
 import { BsXSquareFill } from 'react-icons/bs';
-import { useTransition } from '@remix-run/react';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { FaCheckSquare, FaPenSquare } from 'react-icons/fa';
 import { ImRadioChecked, ImRadioUnchecked } from 'react-icons/im';
@@ -16,8 +15,6 @@ interface ListItemProps {
 }
 
 function ListItem(props: ListItemProps) {
-  const transition = useTransition();
-
   const {
     title,
     endDate,
@@ -45,22 +42,13 @@ function ListItem(props: ListItemProps) {
         <div className="text-blue-500 font-bold">{endDate}</div>
         {!isOnSelectMode && (
           <div className="flex gap-1 items-center">
-            <button
-              onClick={handleEditing}
-              disabled={transition.state === 'submitting'}
-            >
+            <button onClick={handleEditing}>
               <FaPenSquare size="1.5rem" className="text-blue-500" />
             </button>
-            <button
-              onClick={setDone}
-              disabled={transition.state === 'submitting'}
-            >
+            <button onClick={setDone}>
               <FaCheckSquare size="1.5rem" className="text-green-500" />
             </button>
-            <button
-              onClick={onDelete}
-              disabled={transition.state === 'submitting'}
-            >
+            <button onClick={onDelete}>
               <BsXSquareFill size="1.3rem" className="text-red-600" />
             </button>
           </div>

@@ -1,4 +1,3 @@
-import { useTransition } from '@remix-run/react';
 import { BsArrowCounterclockwise, BsXSquareFill } from 'react-icons/bs';
 
 interface ListItemProps {
@@ -8,9 +7,7 @@ interface ListItemProps {
   onDelete: () => void;
 }
 
-function ListItem(props: ListItemProps) {
-  const transition = useTransition();
-
+function DoneListItem(props: ListItemProps) {
   const { title, endDate, onDelete, setUndone } = props;
 
   return (
@@ -21,15 +18,11 @@ function ListItem(props: ListItemProps) {
         <div className="flex gap-1 items-center">
           <button
             onClick={setUndone}
-            disabled={transition.state === 'submitting'}
             className="bg-yellow-600 rounded w-5 h-5 flex items-center justify-center"
           >
             <BsArrowCounterclockwise className="text-gray-300" />
           </button>
-          <button
-            onClick={onDelete}
-            disabled={transition.state === 'submitting'}
-          >
+          <button onClick={onDelete}>
             <BsXSquareFill size="1.3rem" className="text-red-500" />
           </button>
         </div>
@@ -38,4 +31,4 @@ function ListItem(props: ListItemProps) {
   );
 }
 
-export default ListItem;
+export default DoneListItem;

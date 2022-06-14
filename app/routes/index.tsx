@@ -3,12 +3,12 @@ import { useFormik } from 'formik';
 import { redirect } from '@remix-run/node';
 import { FaUserCircle } from 'react-icons/fa';
 import { useActionData, useSubmit } from '@remix-run/react';
-import type { ActionFunction } from '@remix-run/node';
+import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 
 import Input from '~/components/Input';
 import Button from '~/components/Button';
 import { parseDataToSubmit } from '~/utils/parseDataToSubmit';
-import { apiCall, storage } from '~/utils/api';
+import { apiCall, getUser, storage } from '~/utils/api';
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -19,6 +19,16 @@ const validationSchema = Yup.object({
     .min(6, 'Password must have at least six characters'),
 });
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const { isSessionActive } = await getUser(request);
+
+  if (isSessionActive) {
+    return redirect('/todos');
+  }
+
+  return null;
+};
+
 export const action: ActionFunction = async ({ request }) => {
   const data = JSON.parse(
     (await request.formData()).get('data')?.toString() ?? ''
@@ -26,24 +36,31 @@ export const action: ActionFunction = async ({ request }) => {
 
   const { route, ...rest } = data;
 
-  const req = await apiCall(route, 'post', rest);
+  try {
+    const req = await apiCall(route, 'post', rest);
 
-  if (req.status !== 201) {
+    if (req.status !== 201) {
+      return {
+        formError:
+          (await req.json().then((data) => data.message)) ||
+          'Password or username incorrects',
+      };
+    } else {
+      const { accessToken, userId } = await req.json();
+      const session = await storage.getSession();
+      session.set('userId', userId);
+      session.set('token', accessToken);
+
+      return redirect('/todos', {
+        headers: {
+          'Set-Cookie': await storage.commitSession(session),
+        },
+      });
+    }
+  } catch (error) {
     return {
-      formError:
-        (await req.json().then((data) => data.message)) ||
-        'Password or username incorrects',
+      formError: 'Something unexpected just happen',
     };
-  } else {
-    const { accessToken } = await req.json();
-    const session = await storage.getSession();
-    session.set('token', accessToken);
-
-    return redirect('/todos', {
-      headers: {
-        'Set-Cookie': await storage.commitSession(session),
-      },
-    });
   }
 };
 
@@ -51,13 +68,16 @@ export default function Index() {
   const actionData = useActionData();
   const submit = useSubmit();
 
-  const handleFormSubmit = (values) =>
-    submit(parseDataToSubmit(values), { method: 'post' });
+  const handleFormSubmit = (values: {
+    username: string;
+    password: string;
+    route: string;
+  }) => submit(parseDataToSubmit(values), { method: 'post' });
 
   const initialValues = {
     username: actionData?.username || '',
     password: actionData?.password || '',
-    route: actionData?.route || 'user',
+    route: actionData?.route || 'auth/login',
   };
 
   const form = useFormik({
@@ -79,9 +99,7 @@ export default function Index() {
             <label className="flex items-center">
               <Input
                 type="radio"
-                defaultChecked={
-                  !actionData?.route || actionData?.route === 'auth/login'
-                }
+                defaultChecked={form.values.route === 'auth/login'}
                 {...form.getFieldProps('route')}
                 value="auth/login"
               />{' '}
@@ -90,9 +108,7 @@ export default function Index() {
             <label className="flex items-center">
               <Input
                 type="radio"
-                defaultChecked={
-                  !actionData?.route || actionData?.route === 'user'
-                }
+                defaultChecked={form.values.route === 'user'}
                 {...form.getFieldProps('route')}
                 value="user"
               />{' '}

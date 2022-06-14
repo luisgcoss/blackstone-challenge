@@ -8,7 +8,7 @@ const API_URL =
 
 export const storage = createCookieSessionStorage({
   cookie: {
-    name: 'Guada_session',
+    name: 'blackstone',
     secrets: ['s3cret1'],
     sameSite: 'lax',
     path: '/',
@@ -22,6 +22,17 @@ export async function getJWT(request: Request) {
   const token = await session.get('token');
 
   return token;
+}
+
+export async function getUser(request: Request) {
+  const session = await storage.getSession(request?.headers.get('Cookie'));
+  const userId = await session.get('userId');
+  const jwt = await session.get('token');
+
+  const isSessionActive =
+    (await apiCall('auth/me', 'get', null, jwt)).status === 200;
+
+  return { isSessionActive, userId, jwt };
 }
 
 export async function apiCall(
@@ -38,8 +49,4 @@ export async function apiCall(
     },
     body: body ? JSON.stringify(body) : null,
   });
-}
-
-export async function isSessionActive(jwt: string) {
-  return (await apiCall('auth/me', 'get', null, jwt)).status === 200;
 }

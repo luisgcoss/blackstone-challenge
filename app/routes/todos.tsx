@@ -181,10 +181,14 @@ export default function Todos() {
           <Button
             className="h-fit"
             onClick={() =>
-              submit(parseDataToSubmit({ type: 'LOGOUT' }), { method: 'post' })
+              form.values.id
+                ? form.resetForm()
+                : submit(parseDataToSubmit({ type: 'LOGOUT' }), {
+                    method: 'post',
+                  })
             }
           >
-            LogOut
+            {!form.values.id ? 'LogOut' : 'Cancel'}
           </Button>
         </div>
         <div className="mb-2">

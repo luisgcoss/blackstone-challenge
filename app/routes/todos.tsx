@@ -11,42 +11,52 @@ import { redirect } from '@remix-run/node';
 import { FaCheckSquare, FaPenSquare } from 'react-icons/fa';
 import { BsFillPlusSquareFill, BsXSquareFill } from 'react-icons/bs';
 
+import {
+  createTodo,
+  deleteManyTodos,
+  deleteTodo,
+  getUserCredentials,
+  getUserTodos,
+  logOut,
+  updateManyTodos,
+  updateTodo,
+} from '~/utils/api';
+import type { Todo } from '~/types';
 import Input from '~/components/Input';
 import type { RootState } from '~/redux';
 import Button from '~/components/Button';
 import ListItem from '~/components/ListItem';
 import DoneListItem from '~/components/DoneListItem';
 import { useDispatch, useSelector } from 'react-redux';
-import { apiCall, getUser, storage } from '~/utils/api';
 import { parseDataToSubmit } from '~/utils/parseDataToSubmit';
 import { claearSelection, toggleItem } from '~/redux/slices/todosSlice';
 import type { LoaderFunction, ActionFunction } from '@remix-run/node';
 
-type Todo = {
-  id: number;
-  title: string;
-  isMarkedAsDone: boolean;
-  endDate: string;
-};
-
 export const loader: LoaderFunction = async ({ request }) => {
-  const { success, ...rest } = await getUser(request);
+  const { isSessionActive } = await getUserCredentials(request);
 
-  if (success) {
-    const { isSessionActive, userId, jwt } = rest;
-    if (!isSessionActive) {
-      return redirect('/');
-    }
-    return {
-      success: true,
-      data:
-        (await (await apiCall(`user/${userId}/todos`, 'get', null, jwt))
-          .json()
-          .catch((e) => console.log(e))) || [],
-    };
+  if (!isSessionActive) {
+    return redirect('/');
   }
 
-  return { success: false, message: rest.error };
+  try {
+    const todos = await getUserTodos(request);
+    if (todos) {
+      return {
+        success: true,
+        data: todos || [],
+      };
+    }
+    return { success: false, message: todos.error };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Something unexpected just happen',
+    };
+  }
 };
 
 const formValidationSchema = Yup.object({
@@ -61,28 +71,19 @@ export const action: ActionFunction = async ({ request }) => {
     (await request.formData()).get('data')?.toString() ?? ''
   );
   try {
-    const { userId, jwt } = await getUser(request);
-
     switch (type) {
       case 'CREATE':
-        return await apiCall(`user/${userId}/todos`, 'post', rest, jwt);
+        return await createTodo(rest, request);
       case 'DELETE':
-        return await apiCall(`todo/${id}`, 'delete', null, jwt);
+        return await deleteTodo(id, request);
       case 'DELETE_MANY':
-        return await apiCall(`todo`, 'delete', rest, jwt);
+        return await deleteManyTodos(rest, request);
       case 'UPDATE':
-        return await apiCall(`todo/${id}`, 'patch', rest, jwt);
+        return await updateTodo({ id, ...rest }, request);
       case 'UPDATE_MANY':
-        return await apiCall(`todo`, 'patch', rest, jwt);
+        return await updateManyTodos(rest, request);
       case 'LOGOUT':
-        const session = await storage.getSession(
-          request?.headers.get('Cookie')
-        );
-        session.unset('token');
-        session.unset('userId');
-        return redirect('/', {
-          headers: { 'Set-Cookie': await storage.commitSession(session) },
-        });
+        return await logOut(request);
     }
   } catch (error) {
     return {

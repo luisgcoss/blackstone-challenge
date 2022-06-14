@@ -8,7 +8,7 @@ import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import Input from '~/components/Input';
 import Button from '~/components/Button';
 import { parseDataToSubmit } from '~/utils/parseDataToSubmit';
-import { apiCall, getUser, storage } from '~/utils/api';
+import { getUserCredentials, setTokenInstance, singIn } from '~/utils/api';
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -20,7 +20,7 @@ const validationSchema = Yup.object({
 });
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { isSessionActive } = await getUser(request);
+  const { isSessionActive } = await getUserCredentials(request);
 
   if (isSessionActive) {
     return redirect('/todos');
@@ -37,26 +37,18 @@ export const action: ActionFunction = async ({ request }) => {
   const { route, ...rest } = data;
 
   try {
-    const req = await apiCall(route, 'post', rest);
+    const { success, accessToken, userId, message } = await singIn(route, rest);
 
-    if (req.status !== 201) {
+    if (
+      !success ||
+      typeof accessToken !== 'string' ||
+      typeof userId !== 'number'
+    ) {
       return {
-        formError:
-          (await req.json().then((data) => data.message)) ||
-          'Password or username incorrects',
+        formError: message,
       };
     } else {
-      const { accessToken, userId } = await req.json();
-
-      const session = await storage.getSession();
-      session.set('userId', userId);
-      session.set('token', accessToken);
-
-      return redirect('/todos', {
-        headers: {
-          'Set-Cookie': await storage.commitSession(session),
-        },
-      });
+      return await setTokenInstance(accessToken, userId);
     }
   } catch (error) {
     return {

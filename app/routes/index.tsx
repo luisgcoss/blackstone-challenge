@@ -47,6 +47,7 @@ export const action: ActionFunction = async ({ request }) => {
       };
     } else {
       const { accessToken, userId } = await req.json();
+
       const session = await storage.getSession();
       session.set('userId', userId);
       session.set('token', accessToken);
@@ -59,7 +60,10 @@ export const action: ActionFunction = async ({ request }) => {
     }
   } catch (error) {
     return {
-      formError: 'Something unexpected just happen',
+      formError:
+        error instanceof Error
+          ? error.message
+          : 'Something unexpected just happen',
     };
   }
 };

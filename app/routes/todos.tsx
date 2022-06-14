@@ -30,17 +30,23 @@ type Todo = {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { userId, isSessionActive, jwt } = await getUser(request);
+  const { success, ...rest } = await getUser(request);
 
-  if (!isSessionActive) {
-    return redirect('/');
+  if (success) {
+    const { isSessionActive, userId, jwt } = rest;
+    if (!isSessionActive) {
+      return redirect('/');
+    }
+    return {
+      success: true,
+      data:
+        (await (await apiCall(`user/${userId}/todos`, 'get', null, jwt))
+          .json()
+          .catch((e) => console.log(e))) || [],
+    };
   }
 
-  return {
-    data: await (
-      await apiCall(`user/${userId}/todos`, 'get', null, jwt)
-    ).json(),
-  };
+  return { success: false, message: rest.error };
 };
 
 const formValidationSchema = Yup.object({
@@ -80,7 +86,10 @@ export const action: ActionFunction = async ({ request }) => {
     }
   } catch (error) {
     return {
-      formError: 'Something unexpected just happen',
+      formError:
+        error instanceof Error
+          ? error.message
+          : 'Something unexpected just happen',
     };
   }
 
@@ -88,7 +97,7 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function Todos() {
-  const { data } = useLoaderData();
+  const { success, data, ...rest } = useLoaderData();
   const transition = useTransition();
   const submit = useSubmit();
   const dispatch = useDispatch();
@@ -173,9 +182,9 @@ export default function Todos() {
         <div className="mb-2">
           {!(selectedItems.length >= 1) ? (
             <form onSubmit={form.handleSubmit}>
-              {actionData?.formError ? (
+              {actionData?.formError || !success ? (
                 <p className="text-xs text-red-500" role="alert">
-                  {actionData.formError}
+                  {actionData?.formError || rest.message}
                 </p>
               ) : null}
               <div className="flex items-center">
@@ -202,7 +211,8 @@ export default function Todos() {
                   disabled={
                     !form.isValid ||
                     transition.state === 'submitting' ||
-                    !form.dirty
+                    !form.dirty ||
+                    !success
                   }
                 >
                   {form.values.id ? (
@@ -211,7 +221,8 @@ export default function Todos() {
                       className={`${
                         !form.isValid ||
                         transition.state === 'submitting' ||
-                        !form.dirty
+                        !form.dirty ||
+                        !success
                           ? 'text-gray-300'
                           : 'text-blue-500'
                       }`}
@@ -222,7 +233,8 @@ export default function Todos() {
                       className={`${
                         !form.isValid ||
                         transition.state === 'submitting' ||
-                        !form.dirty
+                        !form.dirty ||
+                        !success
                           ? 'text-gray-300'
                           : 'text-blue-500'
                       }`}
@@ -268,7 +280,7 @@ export default function Todos() {
           )}
         </div>
         <div className="bg-blue-300 rounded p-2 h-full overflow-y-auto">
-          {data?.find((todo: Todo) => !todo.isMarkedAsDone) ? (
+          {success && data?.find((todo: Todo) => !todo.isMarkedAsDone) ? (
             data.reduce((prv: ReactElement[], crr: Todo) => {
               if (!crr.isMarkedAsDone)
                 return [
@@ -305,7 +317,7 @@ export default function Todos() {
           Done
         </h1>
         <div className="bg-blue-300 rounded p-2 h-full overflow-y-auto">
-          {!data?.find((todo: Todo) => todo.isMarkedAsDone) ? (
+          {!success && !data?.find((todo: Todo) => todo.isMarkedAsDone) ? (
             <p>Your done todos will appear here</p>
           ) : (
             data.reduce((prv: ReactElement[], crr: Todo) => {

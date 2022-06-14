@@ -29,10 +29,18 @@ export async function getUser(request: Request) {
   const userId = await session.get('userId');
   const jwt = await session.get('token');
 
-  const isSessionActive =
-    (await apiCall('auth/me', 'get', null, jwt)).status === 200;
+  try {
+    const isSessionActive =
+      (await apiCall('auth/me', 'get', null, jwt)).status === 200;
 
-  return { isSessionActive, userId, jwt };
+    return { success: true, isSessionActive, userId, jwt };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Something unexpected happed',
+    };
+  }
 }
 
 export async function apiCall(
